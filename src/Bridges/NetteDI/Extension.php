@@ -19,12 +19,11 @@ class Extension extends CompilerExtension {
         $config = $this->getConfig([
             'expiration' => '20 days',
             'expirationSliding' => true,
-            'appName' => 'app',
-            'path' => '',
+            'path' => '%appDir%/../session',
             'storage' => '@' . $this->prefix('storage')
         ]);
 
-        $path = $config['path'] . '/' . $config['appName'];
+        $path = $config['path'];
 
         if (!file_exists($path)) {
             FileSystem::createDir($path);
