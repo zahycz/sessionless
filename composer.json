@@ -1,5 +1,6 @@
 {
 	"name": "zahycz/sessionless",
+	"description": "Non-I/O blocking PHP SessionHandler implementation using Nette/Caching with DI Extension for Nette framework",
 	"keywords": ["nette", "session"],
 	"homepage": "https://webki.cz",
 	"license": ["BSD-3-Clause"],
@@ -15,6 +16,11 @@
 		"nette/caching": "^2.5",
 		"nette/di": "^2.4",
 		"nette/http": "^2.4"
+	},
+	"autoload": {
+		"psr-4": {
+			"ZahyCZ\\SessionLess\\": "src/"
+		}
 	},
 	"minimum-stability": "dev"
 }
