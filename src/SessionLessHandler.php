@@ -32,6 +32,11 @@ class SessionLessHandler implements \SessionHandlerInterface {
     protected $storage;
 
     /**
+     * @var int
+     */
+    protected $maxlifeTime;
+
+    /**
      * SessionLessHandler constructor.
      * @param string $expiration
      * @param bool $expirationSliding
@@ -65,9 +70,6 @@ class SessionLessHandler implements \SessionHandlerInterface {
      * @return int
      */
     public function gc($maxlifetime): int {
-        $this->cache->clean([
-            Cache::PRIORITY => (time() - $maxlifetime)
-        ]);
         return 1;
     }
 
@@ -97,10 +99,11 @@ class SessionLessHandler implements \SessionHandlerInterface {
      * @throws \Throwable
      */
     public function write($session_id, $session_data): bool {
+        $maxlifetime = ini_get("session.gc_maxlifetime");
+        
         $this->cache->save($session_id, $session_data, [
-            Cache::EXPIRE => $this->expiration,
+            Cache::EXPIRE => $maxlifetime ?: $this->expiration,
             Cache::SLIDING => true,
-            Cache::PRIORITY => time()
         ]);
 
         return true;
