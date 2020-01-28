@@ -15,7 +15,6 @@
 		"ext-pdo_sqlite": "*",
 		"nette/caching": "^2.5",
 		"nette/di": "^2.4",
-		"nette/http": "^2.4"
 	},
 	"autoload": {
 		"psr-4": {

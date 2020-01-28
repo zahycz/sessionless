@@ -32,11 +32,6 @@ class SessionLessHandler implements \SessionHandlerInterface {
     protected $storage;
 
     /**
-     * @var int
-     */
-    protected $maxlifeTime;
-
-    /**
      * SessionLessHandler constructor.
      * @param string $expiration
      * @param bool $expirationSliding
