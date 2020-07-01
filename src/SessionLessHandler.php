@@ -32,15 +32,27 @@ class SessionLessHandler implements \SessionHandlerInterface {
     protected $storage;
 
     /**
+     * @var bool
+     */
+    protected $saveNetteUserTags;
+
+    /**
      * SessionLessHandler constructor.
+     * @param IStorage $storage
      * @param string $expiration
      * @param bool $expirationSliding
-     * @param IStorage $storage
+     * @param bool $saveNetteUserTags
      */
-    public function __construct(IStorage $storage, string $expiration, bool $expirationSliding) {
+    public function __construct(
+        IStorage $storage,
+        string $expiration,
+        bool $expirationSliding,
+        bool $saveNetteUserTags = true
+    ) {
         $this->expiration = $expiration;
         $this->expirationSliding = $expirationSliding;
         $this->storage = $storage;
+        $this->saveNetteUserTags = $saveNetteUserTags;
     }
 
     /**
@@ -95,12 +107,39 @@ class SessionLessHandler implements \SessionHandlerInterface {
      */
     public function write($session_id, $session_data): bool {
         $maxlifetime = ini_get("session.gc_maxlifetime");
-        
+
+        $tags = ['Nette.Http.UserStorage'];
+
+        if ($this->saveNetteUserTags) {
+            $userTags = SessionUtils::getUserIdTagsFromSessionData($session_data);
+            $tags = array_merge($tags, $userTags);
+        }
+
         $this->cache->save($session_id, $session_data, [
-            Cache::EXPIRE => $maxlifetime ?: $this->expiration,
+            Cache::TAGS    => $tags,
+            Cache::EXPIRE  => $maxlifetime ?: $this->expiration,
             Cache::SLIDING => true,
         ]);
 
         return true;
+    }
+
+    /**
+     * @param string $appName
+     * @param string $id
+     */
+    public function cleanByUserTag(string $appName, string $userId): void {
+        $this->cache->clean([
+            Cache::TAGS => ['Nette.Http.UserStorage/' . $appName . '/' . $userId],
+        ]);
+    }
+
+    /**
+     * 
+     */
+    public function cleanAll(): void {
+        $this->cache->clean([
+            Cache::TAGS => ['Nette.Http.UserStorage'],
+        ]);
     }
 }

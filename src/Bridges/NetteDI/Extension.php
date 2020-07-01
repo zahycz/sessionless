@@ -20,7 +20,8 @@ class Extension extends CompilerExtension {
             'expiration' => '20 days',
             'expirationSliding' => true,
             'path' => '%appDir%/../session',
-            'storage' => '@' . $this->prefix('storage')
+            'storage' => '@' . $this->prefix('storage'),
+            'saveNetteUserTags' => true
         ]);
 
         $path = $config['path'];
@@ -39,7 +40,7 @@ class Extension extends CompilerExtension {
 
 
         $builder->addDefinition($this->prefix('sessionLessHandler'))
-            ->setFactory(SessionLessHandler::class, ['storage' => $config['storage'], 'expiration' => $config['expiration'], 'expirationSliding' => $config['expirationSliding']]);
+            ->setFactory(SessionLessHandler::class, ['storage' => $config['storage'], 'expiration' => $config['expiration'], 'expirationSliding' => $config['expirationSliding'], 'saveNetteUserTags' => $config['saveNetteUserTags']]);
 
         $builder->getDefinition('session')
             ->addSetup('setHandler', ['@' . $this->prefix('sessionLessHandler')]);
