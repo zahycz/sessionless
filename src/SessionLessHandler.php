@@ -86,7 +86,7 @@ class SessionLessHandler implements \SessionHandlerInterface {
      * @return bool
      */
     public function open($save_path, $name): bool {
-        $this->cache = new Cache($this->storage, 'SessionLess');
+        $this->initCache();
         return true;
     }
 
@@ -114,7 +114,7 @@ class SessionLessHandler implements \SessionHandlerInterface {
             $userTags = SessionUtils::getUserIdTagsFromSessionData($session_data);
             $tags = array_merge($tags, $userTags);
         }
-
+        
         $this->cache->save($session_id, $session_data, [
             Cache::TAGS    => $tags,
             Cache::EXPIRE  => $maxlifetime ?: $this->expiration,
@@ -129,6 +129,7 @@ class SessionLessHandler implements \SessionHandlerInterface {
      * @param string $id
      */
     public function cleanByUserTag(string $appName, string $userId): void {
+        $this->initCache();
         $this->cache->clean([
             Cache::TAGS => ['Nette.Http.UserStorage/' . $appName . '/' . $userId],
         ]);
@@ -138,8 +139,18 @@ class SessionLessHandler implements \SessionHandlerInterface {
      * 
      */
     public function cleanAll(): void {
+        $this->initCache();
         $this->cache->clean([
             Cache::TAGS => ['Nette.Http.UserStorage'],
         ]);
+    }
+
+    /**
+     *
+     */
+    private function initCache(): void {
+        if(!$this->cache) {
+            $this->cache = new Cache($this->storage, 'SessionLess');
+        }
     }
 }
