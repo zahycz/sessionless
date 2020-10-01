@@ -53,7 +53,7 @@ class SessionUtils {
         $offset = 0;
         while ($offset < strlen($session_data)) {
             if (!strstr(substr($session_data, $offset), "|")) {
-                throw new Exception("invalid data, remaining: " . substr($session_data, $offset));
+                throw new \Exception("invalid data, remaining: " . substr($session_data, $offset));
             }
             $pos = strpos($session_data, "|", $offset);
             $num = $pos - $offset;
