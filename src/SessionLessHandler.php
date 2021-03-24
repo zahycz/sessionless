@@ -118,7 +118,7 @@ class SessionLessHandler implements \SessionHandlerInterface {
         $this->cache->save($session_id, $session_data, [
             Cache::TAGS    => $tags,
             Cache::EXPIRE  => $maxlifetime ?: $this->expiration,
-            Cache::SLIDING => true,
+            Cache::SLIDING => $this->expirationSliding,
         ]);
 
         return true;
