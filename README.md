@@ -3,7 +3,7 @@ Non-I/O blocking PHP SessionHandler implementation using Nette/Caching with DI E
 
 ## Install
 ```yaml
-composer require zahycz/sessionless:dev-master
+composer require zahycz/sessionless
 ```
 
 ## Configuration
@@ -16,5 +16,5 @@ sessionless:
     path: '/../../../data'
     expiration: 20 days
     expirationSliding: true
-    #storage: @Nette\Caching\IStorage
+    #storage: @Nette\Caching\Storage
 ```

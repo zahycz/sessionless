@@ -7,44 +7,29 @@ namespace ZahyCZ\SessionLess;
 
 
 use Nette\Caching\Cache;
-use Nette\Caching\IStorage;
+use Nette\Caching\Storage;
 
 class SessionLessHandler implements \SessionHandlerInterface {
 
-    /**
-     * @var string
-     */
-    protected $expiration;
+    protected string $expiration;
 
-    /**
-     * @var bool
-     */
-    protected $expirationSliding;
+    protected bool $expirationSliding;
 
-    /**
-     * @var Cache
-     */
-    protected $cache;
+    protected Cache $cache;
 
-    /**
-     * @var IStorage
-     */
-    protected $storage;
+    protected Storage $storage;
 
-    /**
-     * @var bool
-     */
-    protected $saveNetteUserTags;
+    protected bool $saveNetteUserTags;
 
     /**
      * SessionLessHandler constructor.
-     * @param IStorage $storage
+     * @param Storage $storage
      * @param string $expiration
      * @param bool $expirationSliding
      * @param bool $saveNetteUserTags
      */
     public function __construct(
-        IStorage $storage,
+        Storage $storage,
         string $expiration,
         bool $expirationSliding,
         bool $saveNetteUserTags = true
@@ -64,58 +49,58 @@ class SessionLessHandler implements \SessionHandlerInterface {
     }
 
     /**
-     * @param string $session_id
+     * @param string $id
      * @return bool
      */
-    public function destroy($session_id): bool {
-        $this->cache->remove($session_id);
+    public function destroy($id): bool {
+        $this->cache->remove($id);
         return true;
     }
 
     /**
-     * @param int $maxlifetime
+     * @param int $max_lifetime
      * @return int
      */
-    public function gc($maxlifetime): int {
+    public function gc($max_lifetime): int {
         return 1;
     }
 
     /**
-     * @param string $save_path
+     * @param string $path
      * @param string $name
      * @return bool
      */
-    public function open($save_path, $name): bool {
+    public function open($path, $name): bool {
         $this->initCache();
         return true;
     }
 
     /**
-     * @param string $session_id
+     * @param string $id
      * @return string
+     * @throws \Throwable
      */
-    public function read($session_id): string {
-        $value = $this->cache->load($session_id);
+    public function read($id): string {
+        $value = $this->cache->load($id);
         return (string)$value;
     }
 
     /**
-     * @param string $session_id
-     * @param string $session_data
+     * @param string $id
+     * @param string $data
      * @return bool
-     * @throws \Throwable
      */
-    public function write($session_id, $session_data): bool {
+    public function write($id, $data): bool {
         $maxlifetime = ini_get("session.gc_maxlifetime");
 
         $tags = ['Nette.Http.UserStorage'];
 
         if ($this->saveNetteUserTags) {
-            $userTags = SessionUtils::getUserIdTagsFromSessionData($session_data);
+            $userTags = SessionUtils::getUserIdTagsFromSessionData($data);
             $tags = array_merge($tags, $userTags);
         }
         
-        $this->cache->save($session_id, $session_data, [
+        $this->cache->save($id, $data, [
             Cache::TAGS    => $tags,
             Cache::EXPIRE  => $maxlifetime ?: $this->expiration,
             Cache::SLIDING => $this->expirationSliding,
@@ -126,7 +111,7 @@ class SessionLessHandler implements \SessionHandlerInterface {
 
     /**
      * @param string $appName
-     * @param string $id
+     * @param string $userId
      */
     public function cleanByUserTag(string $appName, string $userId): void {
         $this->initCache();
