@@ -15,7 +15,7 @@ class SessionLessHandler implements \SessionHandlerInterface {
 
     protected bool $expirationSliding;
 
-    protected Cache $cache;
+    protected ?Cache $cache = null;
 
     protected Storage $storage;
 
