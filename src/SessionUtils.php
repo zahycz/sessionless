@@ -18,7 +18,7 @@ class SessionUtils {
         $tags = [];
         if($netteSessionData = self::unserialize($sessionData)['__NF']['DATA'] ?? false) {
             foreach ($netteSessionData as $name => $value)  {
-                if($value['identity'] instanceof IIdentity && str_contains($name, 'Nette.Http.UserStorage') !== false) {
+                if(isset($value['identity']) && $value['identity'] instanceof IIdentity && str_contains($name, 'Nette.Http.UserStorage') !== false) {
                     $tags[] = $name.'/'.$value['identity']->getId();
                 }
             }
