@@ -93,19 +93,23 @@ class SessionLessHandler implements \SessionHandlerInterface {
     public function write($id, $data): bool {
         $maxlifetime = ini_get("session.gc_maxlifetime");
 
-        $tags = ['Nette.Http.UserStorage'];
+        $tags = ['Nette.Http.SessionLess'];
 
+        $exists = true;
+        
         if ($this->saveNetteUserTags) {
-            $userTags = SessionUtils::getUserIdTagsFromSessionData($data);
+            [$userTags, $exists] = SessionUtils::getUserIdTagsFromSessionData($data);
             $tags = array_merge($tags, $userTags);
         }
-        
-        $this->cache->save($id, $data, [
-            Cache::TAGS    => $tags,
-            Cache::EXPIRE  => $maxlifetime ?: $this->expiration,
-            Cache::SLIDING => $this->expirationSliding,
-        ]);
 
+        if($exists) {
+            $this->cache->save($id, $data, [
+                Cache::TAGS    => $tags,
+                Cache::EXPIRE  => $maxlifetime ?: $this->expiration,
+                Cache::SLIDING => $this->expirationSliding,
+            ]);
+        }
+        
         return true;
     }
 
