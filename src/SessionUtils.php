@@ -16,19 +16,22 @@ class SessionUtils {
      */
     public static function getUserIdTagsFromSessionData(string $sessionData): array {
         $tags = [];
-        $exists = true;
+        $write = true;
         if($netteSessionData = self::unserialize($sessionData)['__NF']['DATA'] ?? false) {
             foreach ($netteSessionData as $name => $value)  {
-                if(array_key_exists('identity', $value) && str_contains($name, 'Nette.Http.UserStorage') !== false) {
-                    if($value['identity'] instanceof IIdentity ) {
-                        $tags[] = $name . '/' . $value['identity']->getId();
-                    } else {
-                        $exists = false;
+                    if(is_array($value) && array_key_exists('identity', $value) && str_contains($name, 'Nette.Http.UserStorage') !== false) {
+                        if($value['identity'] instanceof IIdentity ) {
+                            $tags[] = $name . '/' . $value['identity']->getId();
+                        } else {
+                            $write = false;
+                        }
                     }
-                }
+            }
+            if(count($netteSessionData) > 1) {
+                $write = true;
             }
         }
-        return [$tags, $exists];
+        return [$tags, $write];
     }
 
     /**
