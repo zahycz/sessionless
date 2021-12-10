@@ -9,6 +9,27 @@ namespace ZahyCZ\SessionLess;
 use Nette\Security\IIdentity;
 
 class SessionUtils {
+    
+    /**
+     * @param array $data
+     * @return bool
+     */
+    public static function isEmptyData(array $data): bool {
+        foreach ($data as $key => $item) {
+            if ($key === 'Time') {
+                continue;
+            }
+
+            if (is_array($item)) {
+                if (!self::isEmptyData($item)) {
+                    return false;
+                }
+            } elseif ($item) {
+                return false;
+            }
+        }
+        return true;
+    }
 
     /**
      * @param string $sessionData
@@ -16,21 +37,28 @@ class SessionUtils {
      */
     public static function getUserIdTagsFromSessionData(string $sessionData): array {
         $tags = [];
+        $sessionData = self::unserialize($sessionData);
+
+        if (empty($sessionData)) {
+            return [$tags, false];
+        }
+
+        if (self::isEmptyData($sessionData)) {
+            return [$tags, false];
+        }
+
         $write = true;
-        if($netteSessionData = self::unserialize($sessionData)['__NF']['DATA'] ?? false) {
-            foreach ($netteSessionData as $name => $value)  {
-                    if(is_array($value) && array_key_exists('identity', $value) && str_contains($name, 'Nette.Http.UserStorage') !== false) {
-                        if($value['identity'] instanceof IIdentity ) {
-                            $tags[] = $name . '/' . $value['identity']->getId();
-                        } else {
-                            $write = false;
-                        }
+
+        if ($netteSessionData = $sessionData['__NF']['DATA'] ?? false) {
+            foreach ($netteSessionData as $name => $value) {
+                if (is_array($value) && str_contains($name, 'Nette.Http.UserStorage') !== false && array_key_exists('identity', $value)) {
+                    if ($value['identity'] instanceof IIdentity) {
+                        $tags[] = $name . '/' . $value['identity']->getId();
                     }
-            }
-            if(count($netteSessionData) > 1) {
-                $write = true;
+                }
             }
         }
+        
         return [$tags, $write];
     }
 
